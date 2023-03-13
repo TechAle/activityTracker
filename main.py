@@ -27,6 +27,7 @@ CLOSE_DISCORD = True
 DISCORD_RPC = True
 IDLE = True
 IDE = ["Code", "Intellij", "Jetbrains"]
+time = {}
 def threadSelectedProcess():
     global Discord, active, last_active_name
     active = True
@@ -70,6 +71,9 @@ def isIdling(mouseCoords):
         return timeNow - mouseCoords[2] >= idleTIME, mouseCoords
     else:
         return False, [nowMouseCoords[0], nowMouseCoords[1], timeNow]
+
+def loadTime():
+    pass
 
 def main():
     global Discord, active
