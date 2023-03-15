@@ -26,6 +26,9 @@ class processManager:
         self.lastActitityTime = time()
         self.activities = {}
         self.last_active_name = ""
+        self.WAITING_TIME = 10
+        self.MAX_TICK_SAVE = 5
+        self.tickNow = 0
         signal(SIGTERM, self._onAbort)
         signal(SIGINT, self._onAbort)
 
@@ -52,6 +55,9 @@ class processManager:
                     self._checkSelectedWindow()
                     # And if we are idling
                     self._checkIdling()
+                    # If we are not idling, then increase counter
+                    if not self.isIdling:
+                        self.addTimeApp(self.last_active_name, self.WAITING_TIME)
 
             else:
                 # If the process doesnt exists, update things
@@ -59,6 +65,12 @@ class processManager:
                     if self.configuration["DiscordRPC"]:
                         self.threadDiscord.stop()
                     self.existedBefore = False
+            sleep(self.WAITING_TIME)
+            if self.MAX_TICK_SAVE >= self.tickNow:
+                self.tickNow+=1
+            else:
+                self.tickNow = 0
+                self.saveConfiguration()
 
     def _checkIdling(self):
         pass
@@ -73,14 +85,16 @@ class processManager:
         self.last_active_name = active_app['NSApplicationName']
         self.lastActitityTime = time()
         if self.configuration["DiscordRPC"]:
-            if self.last_active_name == "OneNote":
-                self.threadDiscord.setSituation("Taking notes")
-            elif self.last_active_name == "Safari":
-                self.threadDiscord.setSituation("Watching lectures")
-            elif self.last_active_name == "Anteprima":
-                self.threadDiscord.setSituation("Reading notes")
-            else:
-                self.threadDiscord.setSituation("On this application: " + self.last_active_name)
+            found = False
+            keys = list(self.activitiesConfiguration.keys())
+            keys.pop(keys.index("Time"))
+            for activity in keys:
+                if self.activitiesConfiguration[activity].__contains__(self.last_active_name):
+                    self.threadDiscord.setSituation(activity.replace("_", " "))
+                    found = True
+                    break
+            if not found:
+                self.threadDiscord.setSituation("On: " + self.last_active_name)
         # If we are on discord, and i dont want to open discord, then close it
         if self.last_active_name != "Discord" or not self.configuration["Close_Discord"]:
             return
@@ -108,22 +122,24 @@ class processManager:
         self.managerAlive = False
         self.saveConfiguration()
 
-    def _calculateActivities(self):
-        for activity in self.activitiesConfiguration["Time"]:
-            self._addActivity(activity, self.activitiesConfiguration["Time"][activity])
+    def calculateActivityApps(self):
+        for app in self.activitiesConfiguration["time"]:
+            self.addTimeApp(app, self.activitiesConfiguration["time"][app])
 
-    def _addActivity(self, activity, time):
-        if not self.activities.__contains__(activity):
-            self.activities[activity] = 0
-        self.activities[activity] += time
+    def addTimeApp(self, app, time):
+        if not self.activityApps.__contains__(app):
+            self.activityApps[app] = 0
+        self.activityApps[app] += time
 
     def loadConfiguration(self):
         self.configuration = json.load(open("configuration.json", "r"))
         self.activitiesConfiguration = json.load(open("activities.json", "r"))
         self.activities = list(json.load(open("activities.json", "r")).keys())
         self.activities.pop(self.activities.index("Time"))
+        self.copyActivities = self.activities.copy()
         self.activities = {k:0 for k in self.activities}
-        self._calculateActivities()
+        self.activityApps = {}
+        self.calculateActivityApps
         self._importLibrearies()
 
     def _importLibrearies(self):
@@ -131,4 +147,8 @@ class processManager:
             self.threadDiscord = RPCmanager(threading.currentThread())
 
     def saveConfiguration(self):
-        pass
+        toSave = self.activitiesConfiguration.copy()
+        toSave["Time"] = self.activityApps
+        with open("activities.json", "w") as f:
+            f.write(json.dumps(toSave, indent=4))
+            f.close()

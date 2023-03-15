@@ -10,7 +10,7 @@ class RPCmanager:
     def __init__(self, mainThread):
         self.on = True
         self.client_id = "1084765396344782868"
-        self.situation = "Writing" # Reading/Writing notes, Watching lectures
+        self.situation = "Starting" # Reading/Writing notes, Watching lectures
         self.mainThread = mainThread
         self.hasStarted = False
         self.initPresence()
@@ -47,7 +47,7 @@ class RPCmanager:
                 large_text="Studying",
                 details=self.situation,
                 start=self.startTime,
-                buttons=[{"label": "Github", "url": "https://github.com/TechAle/"}]
+                buttons=[{"label": "Github", "url": "https://github.com/TechAle/activityTracker"}]
             )
             time.sleep(10)
         self.RPC.close()
