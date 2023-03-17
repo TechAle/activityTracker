@@ -41,7 +41,7 @@ class RPCmanager:
         self.situation = situation
 
     def run(self):
-        while self.on:
+        while self.on and self.mainThread.is_alive():
             self.RPC.update(
                 large_image="pic",
                 large_text="Studying",

@@ -144,7 +144,7 @@ class processManager:
 
     def _importLibrearies(self):
         if self.configuration["DiscordRPC"]:
-            self.threadDiscord = RPCmanager(threading.currentThread())
+            self.threadDiscord = RPCmanager(threading.current_thread())
 
     def saveConfiguration(self):
         toSave = self.activitiesConfiguration.copy()

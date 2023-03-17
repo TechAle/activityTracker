@@ -1,0 +1,24 @@
+{
+    "Coding": [
+        "Code",
+        "IntelliJ IDEA",
+        "PyCharm",
+        "WebStorm",
+        "Terminale"
+    ],
+    "Taking_Notes": [
+        "Microsoft OneNote"
+    ],
+    "Reading_Notes": [
+        "Anteprima",
+        "Safari",
+        "Finder"
+    ],
+    "Time": {
+        "Microsoft OneNote": 3880,
+        "Safari": 1240,
+        "Discord": 170,
+        "Notes": 10,
+        "Finder": 10
+    }
+}
